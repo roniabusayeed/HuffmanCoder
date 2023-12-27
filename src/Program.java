@@ -1,96 +1,29 @@
 import java.nio.charset.StandardCharsets;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
-
-class Node<T extends Comparable<T>> implements Comparable<Node<T>>{
-    private T data;
-    private Node<T> left;
-    private Node<T> right;
-
-    public Node(T data, Node<T> left, Node<T> right) {
-        setData(data);
-        setLeft(left);
-        setRight(right);
-    }
-
-    public Node(T data) {
-        this(data, null, null);
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public Node<T> getLeft() {
-        return left;
-    }
-
-    public Node<T> getRight() {
-        return right;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public void setLeft(Node<T> left) {
-        this.left = left;
-    }
-
-    public void setRight(Node<T> right) {
-        this.right = right;
-    }
-
-    @Override
-    public int compareTo(Node<T> other) {
-        return this.getData().compareTo(other.getData());
-    }
-}
-
-class Pair<Key, Value extends Comparable<Value>> implements Comparable<Pair<Key, Value>> {
-    private Key key;
-    private Value value;
-
-    public Pair(Key key, Value value) {
-        setKey(key);
-        setValue(value);
-    }
-
-    public Key getKey() {
-        return key;
-    }
-
-    public Value getValue() {
-        return value;
-    }
-
-    public void setKey(Key key) {
-        this.key = key;
-    }
-
-    public void setValue(Value value) {
-        this.value = value;
-    }
-
-    @Override
-    public int compareTo(Pair<Key, Value> other) {
-        return this.getValue().compareTo(other.getValue());
-    }
-}
-
-class NodeComparator<T extends Comparable<T>> implements Comparator<Node<T>> {
-    @Override
-    public int compare(Node<T> first, Node<T> second) {
-        return first.compareTo(second);
-    }
-}
+import java.util.*;
 
 public class Program {
     public static void main(String[] args) {
         byte[] bytes = "Hello, world!".getBytes(StandardCharsets.UTF_8);
         byte[] encodedBytes = encode(bytes);
+    }
+
+    private static void generateCode(Node<Pair<Byte, Integer>> huffmanTree,
+                                     HashMap<Byte, String> huffmanCodes) {
+
+        // Recursive helper function.
+        generateCode(huffmanTree, huffmanCodes, "");
+    }
+
+    private static void generateCode(Node<Pair<Byte, Integer>> huffmanTree,
+                                     HashMap<Byte, String> huffmanCodes,
+                                     String huffmanCode) {
+
+        if (huffmanTree.isLeaf()) {
+            huffmanCodes.put(huffmanTree.getData().getKey(), huffmanCode);
+        } else {
+            generateCode(huffmanTree.getLeft(), huffmanCodes, huffmanCode + "0");
+            generateCode(huffmanTree.getRight(), huffmanCodes, huffmanCode + "1");
+        }
     }
 
     private static byte[] encode(byte[] data) {
@@ -100,9 +33,14 @@ public class Program {
 
         // Build Huffman tree.
         NodeComparator<Pair<Byte, Integer>> nodeComparator = new NodeComparator<>();
-        PriorityQueue<Node<Pair<Byte, Integer>>> priorityQueue = buildPriorityQueue(
+        PriorityQueue<Node<Pair<Byte, Integer>>> nodePriorityQueue = buildPriorityQueue(
             frequencyTable, nodeComparator);
-        Node<Pair<Byte, Integer>> huffmanTree = buildHuffmanTree(priorityQueue);
+        Node<Pair<Byte, Integer>> huffmanTree = buildHuffmanTree(nodePriorityQueue);
+
+        // Generate Huffman codes.
+        HashMap<Byte, String> huffmanCodes = new HashMap<>();
+        generateCode(huffmanTree, huffmanCodes);
+
 
 
         return null;
@@ -158,5 +96,121 @@ public class Program {
         }
 
         return priorityQueue;
+    }
+}
+
+class Node<T extends Comparable<T>> implements Comparable<Node<T>>{
+    private T data;
+    private Node<T> left;
+    private Node<T> right;
+
+    public Node(T data, Node<T> left, Node<T> right) {
+        setData(data);
+        setLeft(left);
+        setRight(right);
+    }
+
+    public Node(T data) {
+        this(data, null, null);
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public Node<T> getLeft() {
+        return left;
+    }
+
+    public Node<T> getRight() {
+        return right;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public void setLeft(Node<T> left) {
+        this.left = left;
+    }
+
+    public void setRight(Node<T> right) {
+        this.right = right;
+    }
+
+    @Override
+    public int compareTo(Node<T> other) {
+        return this.getData().compareTo(other.getData());
+    }
+
+    @Override
+    public String toString() {
+        return getData().toString();
+    }
+
+    public boolean isLeaf() {
+        return getLeft() == null && getRight() == null;
+    }
+
+    public static <T extends Comparable<T>> void leverOrderTraversal(Node<T> root) {
+        Queue<Node<T>> queue = new LinkedList<>();
+
+        if (root != null) {
+            queue.offer(root);
+        }
+
+        while (!queue.isEmpty()) {
+            Node<T> node = queue.poll();
+            System.out.println(node);
+            if (node.getLeft() != null) {
+                queue.offer(node.getLeft());
+            }
+            if (node.getRight() != null) {
+                queue.offer(node.getRight());
+            }
+        }
+    }
+}
+
+class Pair<Key, Value extends Comparable<Value>> implements Comparable<Pair<Key, Value>> {
+    private Key key;
+    private Value value;
+
+    public Pair(Key key, Value value) {
+        setKey(key);
+        setValue(value);
+    }
+
+    public Key getKey() {
+        return key;
+    }
+
+    public Value getValue() {
+        return value;
+    }
+
+    public void setKey(Key key) {
+        this.key = key;
+    }
+
+    public void setValue(Value value) {
+        this.value = value;
+    }
+
+    @Override
+    public int compareTo(Pair<Key, Value> other) {
+        return this.getValue().compareTo(other.getValue());
+    }
+
+    @Override
+    public String toString() {
+        return "(" + getKey() + ", " + getValue() + ")";
+    }
+}
+
+class NodeComparator<T extends Comparable<T>> implements Comparator<Node<T>> {
+    @Override
+    public int compare(Node<T> first, Node<T> second) {
+        return first.compareTo(second);
     }
 }
