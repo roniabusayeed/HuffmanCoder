@@ -5,6 +5,8 @@ public class Program {
     public static void main(String[] args) {
         byte[] bytes = "Hello, world!".getBytes(StandardCharsets.UTF_8);
         byte[] encodedBytes = encode(bytes);
+
+        System.out.println(Arrays.toString(encodedBytes));
     }
 
     private static void generateCode(Node<Pair<Byte, Integer>> huffmanTree,
@@ -41,9 +43,39 @@ public class Program {
         HashMap<Byte, String> huffmanCodes = new HashMap<>();
         generateCode(huffmanTree, huffmanCodes);
 
+        StringBuilder encodedData = new StringBuilder();
+        for (byte b : data) {
+            encodedData.append(huffmanCodes.get(b));
+        }
 
+        ArrayList<Byte> encodedBytes = new ArrayList<>();
+        int length = encodedData.length() / 8;
+        int lastByteBitCount = encodedData.length() % 8;
 
-        return null;
+        // The first byte encodes the count of encoded bits in the last byte.
+        encodedBytes.add((byte)lastByteBitCount);
+
+        // Encode the complete bytes.
+        for (int i = 0; i < length; i++) {
+            int startIndex = 8 * i;
+            int endIndex = startIndex + 8;
+            String byteString = encodedData.substring(startIndex, endIndex);
+            encodedBytes.add((byte)Integer.parseInt(byteString, 2));
+        }
+
+        // Encode the last/incomplete byte (if any)
+        if (lastByteBitCount > 0) {
+            int startIndex = length * 8;
+            String byteString = encodedData.substring(startIndex);
+            encodedBytes.add((byte)Integer.parseInt(byteString, 2));
+        }
+
+        // Convert ArrayList of Bytes into byte[].
+        byte[] encodedBytesArray = new byte[encodedBytes.size()];
+        for (int i = 0; i < encodedBytes.size(); i++) {
+            encodedBytesArray[i] = encodedBytes.get(i);
+        }
+        return encodedBytesArray;
     }
 
     private static Node<Pair<Byte, Integer>> buildHuffmanTree(
